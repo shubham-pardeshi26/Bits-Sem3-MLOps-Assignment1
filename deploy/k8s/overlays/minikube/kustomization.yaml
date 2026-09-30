@@ -1,0 +1,31 @@
+# Local cluster: minikube (docker driver) with the ingress and metrics-server addons enabled.
+# The API image is built inside the node (`minikube image build -t cardiorisk-api:1.0.0 .`), so
+# it is never pulled. While `minikube tunnel` runs, the LoadBalancer Service answers on
+# http://127.0.0.1:8081 (8000 and 8080 are often taken locally), the Ingress on http://127.0.0.1/.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: cardiorisk
+resources:
+  - ../../base
+  - ../../monitoring
+  - ingress.yaml
+images:
+  - name: cardiorisk-api
+    newTag: "1.0.0"
+patches:
+  - patch: |-
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: cardiorisk-api
+      spec:
+        type: LoadBalancer
+  # A JSON patch, because a strategic-merge ports patch merges on the port number and would add a
+  # second port named http, which the API server rejects.
+  - target:
+      kind: Service
+      name: cardiorisk-api
+    patch: |-
+      - op: replace
+        path: /spec/ports/0/port
+        value: 8081

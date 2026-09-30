@@ -1,0 +1,16 @@
+# Full development environment: data, EDA, training + MLflow, tests, lint, report.
+#   python3.12 -m venv .venv && .venv/bin/pip install -r requirements.txt
+-r requirements-serve.txt
+mlflow==3.16.1
+# train.py imports skops.io (trusted types of the MLflow model); mlflow alone only asks skops<1.
+skops==0.16.0
+matplotlib==3.11.2
+seaborn==0.13.2
+jupyterlab==4.6.4
+nbconvert==7.17.1
+ipykernel==7.4.0
+pytest==9.1.1
+httpx==0.28.1
+ruff==0.16.9
+pypandoc-binary==1.17
+-e .

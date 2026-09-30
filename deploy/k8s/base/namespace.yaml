@@ -1,0 +1,8 @@
+# Every pod here meets the "restricted" Pod Security Standard; enforcing it makes the cluster
+# reject any manifest change that would weaken the hardening.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cardiorisk
+  labels:
+    pod-security.kubernetes.io/enforce: restricted

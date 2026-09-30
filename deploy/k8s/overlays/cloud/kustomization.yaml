@@ -1,0 +1,34 @@
+# Managed cluster (GKE, EKS, AKS, ...) pulling the image CI publishes. Everything provider- or
+# registry-specific lives in this directory; base and monitoring stay unchanged. Prometheus and
+# Grafana stay ClusterIP (port-forward); replace the demo Grafana password before exposing them.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: cardiorisk
+resources:
+  - ../../base
+  - ../../monitoring
+  - ingress.yaml # the Ingress class differs per provider, see the file
+images:
+  - name: cardiorisk-api
+    # The one line to change for another registry (GHCR paths must be lowercase):
+    #   Docker Hub  docker.io/<user>/cardiorisk-api
+    #   ECR         <account>.dkr.ecr.<region>.amazonaws.com/cardiorisk-api
+    #   GAR         <region>-docker.pkg.dev/<project>/<repository>/cardiorisk-api
+    #   ACR         <registry>.azurecr.io/cardiorisk-api
+    newName: ghcr.io/OWNER/REPO
+    # Prefer the immutable sha-<7> tag: re-applying an unchanged "latest" rolls nothing, and nodes
+    # that already cached it keep the old image (imagePullPolicy IfNotPresent).
+    newTag: latest
+patches:
+  # Its own cloud load balancer, next to the Ingress one; drop either if you pay per balancer.
+  - patch: |-
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: cardiorisk-api
+      spec:
+        type: LoadBalancer
+# Private images: ECR on EKS, GAR on GKE and ACR on AKS (`az aks update --attach-acr`) are pulled
+# with the node identity. A private GHCR or Docker Hub image needs a pull secret
+# (`kubectl -n cardiorisk create secret docker-registry regcred ...`) and one more patch that sets
+# spec.template.spec.imagePullSecrets: [{name: regcred}] on the Deployment.

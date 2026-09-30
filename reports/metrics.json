@@ -1,0 +1,153 @@
+{
+  "champion": "logistic_regression",
+  "training_session": "20260930-051733",
+  "families": {
+    "baseline_majority": {
+      "cv": {
+        "roc_auc_mean": 0.5,
+        "roc_auc_std": 0.0,
+        "accuracy_mean": 0.5531357748578885,
+        "accuracy_std": 0.0027621389261090925,
+        "precision_mean": 0.5531357748578885,
+        "precision_std": 0.0027621389261090925,
+        "recall_mean": 1.0,
+        "recall_std": 0.0,
+        "f1_mean": 0.7122785080547587,
+        "f1_std": 0.0022870669986072923
+      },
+      "test": {
+        "roc_auc": 0.5,
+        "accuracy": 0.5543478260869565,
+        "precision": 0.5543478260869565,
+        "recall": 1.0,
+        "f1": 0.7132867132867133
+      },
+      "params": {},
+      "run_id": "7c373a072176488e8cb51b290211b309",
+      "search_seconds": 2.8
+    },
+    "logistic_regression": {
+      "cv": {
+        "roc_auc_mean": 0.9073962331956912,
+        "roc_auc_std": 0.028706864752583057,
+        "accuracy_mean": 0.8337247227658187,
+        "accuracy_std": 0.029814054451652316,
+        "precision_mean": 0.8534932243722327,
+        "precision_std": 0.02810713960930328,
+        "recall_mean": 0.8448358928033726,
+        "recall_std": 0.029780110574854125,
+        "f1_mean": 0.8489890227802643,
+        "f1_std": 0.026505174070483976
+      },
+      "test": {
+        "roc_auc": 0.9055475848876136,
+        "accuracy": 0.842391304347826,
+        "precision": 0.8288288288288288,
+        "recall": 0.9019607843137255,
+        "f1": 0.863849765258216
+      },
+      "params": {
+        "C": 0.3,
+        "class_weight": null,
+        "l1_ratio": 0.5
+      },
+      "run_id": "bf30234e66d4464b8f8857c6a051d7f8",
+      "search_seconds": 1.0
+    },
+    "random_forest": {
+      "cv": {
+        "roc_auc_mean": 0.8973036739432404,
+        "roc_auc_std": 0.02337246221753937,
+        "accuracy_mean": 0.8228496878203335,
+        "accuracy_std": 0.021870005184233585,
+        "precision_mean": 0.8294465903821748,
+        "precision_std": 0.026154036246114194,
+        "recall_mean": 0.8570912375790425,
+        "recall_std": 0.02793625115163082,
+        "f1_mean": 0.8426006854206658,
+        "f1_std": 0.01872974981982835
+      },
+      "test": {
+        "roc_auc": 0.8961023433763748,
+        "accuracy": 0.8532608695652174,
+        "precision": 0.8440366972477065,
+        "recall": 0.9019607843137255,
+        "f1": 0.8720379146919431
+      },
+      "params": {
+        "max_depth": 8,
+        "max_features": "sqrt",
+        "min_samples_leaf": 1,
+        "n_estimators": 500
+      },
+      "run_id": "78c120f4f0474e819f2e0441c4a964e4",
+      "search_seconds": 6.3
+    },
+    "hist_gradient_boosting": {
+      "cv": {
+        "roc_auc_mean": 0.8950085456047516,
+        "roc_auc_std": 0.025659634576594002,
+        "accuracy_mean": 0.8105954710651384,
+        "accuracy_std": 0.021553994442344876,
+        "precision_mean": 0.8147711216877214,
+        "precision_std": 0.02265689307739769,
+        "recall_mean": 0.8521830773863295,
+        "recall_std": 0.03232714994479716,
+        "f1_mean": 0.8325852751469723,
+        "f1_std": 0.019437653882528747
+      },
+      "test": {
+        "roc_auc": 0.8999282639885222,
+        "accuracy": 0.8532608695652174,
+        "precision": 0.8440366972477065,
+        "recall": 0.9019607843137255,
+        "f1": 0.8720379146919431
+      },
+      "params": {
+        "l2_regularization": 0.0,
+        "learning_rate": 0.03,
+        "max_leaf_nodes": 4
+      },
+      "run_id": "f80a9624199144f99195293ff8bd9770",
+      "search_seconds": 1.1
+    }
+  },
+  "loso": {
+    "cleveland": {
+      "n": 303,
+      "prevalence": 0.45874587458745875,
+      "roc_auc": 0.8756360765046499,
+      "accuracy": 0.7623762376237624,
+      "precision": 0.6892655367231638,
+      "recall": 0.8776978417266187,
+      "f1": 0.7721518987341772
+    },
+    "hungarian": {
+      "n": 293,
+      "prevalence": 0.36177474402730375,
+      "roc_auc": 0.902128947633942,
+      "accuracy": 0.7952218430034129,
+      "precision": 0.6575342465753424,
+      "recall": 0.9056603773584906,
+      "f1": 0.7619047619047619
+    },
+    "switzerland": {
+      "n": 123,
+      "prevalence": 0.9349593495934959,
+      "roc_auc": 0.7489130434782609,
+      "accuracy": 0.7723577235772358,
+      "precision": 0.9578947368421052,
+      "recall": 0.7913043478260869,
+      "f1": 0.8666666666666667
+    },
+    "va": {
+      "n": 199,
+      "prevalence": 0.7437185929648241,
+      "roc_auc": 0.730259671436142,
+      "accuracy": 0.7587939698492462,
+      "precision": 0.8424657534246576,
+      "recall": 0.831081081081081,
+      "f1": 0.8367346938775511
+    }
+  }
+}

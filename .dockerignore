@@ -1,0 +1,10 @@
+# Allowlist: the image needs only the serving pins, the package source and the trained model.
+# Everything else (.venv, data, mlruns, mlflow.db, notebooks, tests, reports, deploy, .git, ...)
+# never reaches the build context.
+*
+!requirements-serve.txt
+!src/
+!models/
+**/__pycache__
+**/*.egg-info
+**/.DS_Store

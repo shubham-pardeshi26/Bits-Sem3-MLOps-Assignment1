@@ -1,0 +1,26 @@
+# Public HTTP entry point. The Ingress class is the provider-specific part:
+#   GKE  replace ingressClassName with the annotation kubernetes.io/ingress.class: gce
+#   EKS  ingressClassName: alb (AWS Load Balancer Controller) with the annotations
+#        alb.ingress.kubernetes.io/scheme: internet-facing, .../target-type: ip and
+#        .../healthcheck-path: /health (the root path answers 307, which fails ALB checks)
+#   AKS  ingressClassName: webapprouting.kubernetes.azure.com (application routing add-on)
+# For a real domain add a host to the rule and a tls section.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cardiorisk-api
+  labels:
+    app.kubernetes.io/name: cardiorisk-api
+    app.kubernetes.io/part-of: cardiorisk
+spec:
+  ingressClassName: nginx # any cluster running ingress-nginx
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cardiorisk-api
+                port:
+                  number: 8000

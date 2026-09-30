@@ -1,0 +1,13 @@
+# Prometheus for docker-compose: the API is one static target on the compose network (same job
+# name and interval as Kubernetes, which discovers pods instead: deploy/k8s/monitoring).
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: cardiorisk-api
+    static_configs:
+      - targets: [api:8000]
+
+  - job_name: prometheus
+    static_configs:
+      - targets: [localhost:9090]

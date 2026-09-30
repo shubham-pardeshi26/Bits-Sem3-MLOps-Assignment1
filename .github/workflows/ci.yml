@@ -1,0 +1,277 @@
+# CardioRisk CI/CD: lint + test -> train -> docker -> deploy-kind -> publish (pushes to main only).
+# Every run leaves its evidence on the run page: job summaries (test result, model comparison
+# table, Prometheus targets, published tags) and the artifacts test-results, model,
+# training-report, mlflow-tracking and image. publish pushes the very image archive that passed
+# the smoke tests in Docker and in kind: nothing is rebuilt after testing.
+#
+# Registry: ghcr.io/<owner>/<repo>, logged in with GITHUB_TOKEN, unless repository variables
+# REGISTRY, IMAGE_NAME, REGISTRY_USERNAME and the secret REGISTRY_PASSWORD are set
+# (Settings > Secrets and variables > Actions). Switching needs no edit to this file:
+#   Docker Hub  REGISTRY=docker.io  IMAGE_NAME=<user>/cardiorisk-api  REGISTRY_USERNAME=<user>
+#               REGISTRY_PASSWORD=<personal access token with write scope>
+#   AWS ECR     REGISTRY=<account>.dkr.ecr.<region>.amazonaws.com  IMAGE_NAME=cardiorisk-api
+#               REGISTRY_USERNAME=<IAM access key id>  REGISTRY_PASSWORD=<its secret access key>
+#               (login-action trades the key for an ECR token; create the repository first)
+#   Google GAR  REGISTRY=<region>-docker.pkg.dev  IMAGE_NAME=<project>/<repository>/cardiorisk-api
+#               REGISTRY_USERNAME=_json_key  REGISTRY_PASSWORD=<service account JSON key>
+#   Azure ACR   REGISTRY=<name>.azurecr.io  IMAGE_NAME=cardiorisk-api
+#               REGISTRY_USERNAME=<service principal client id>  REGISTRY_PASSWORD=<client secret>
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  REGISTRY: ${{ vars.REGISTRY || 'ghcr.io' }}
+  IMAGE_NAME: ${{ vars.IMAGE_NAME || github.repository }}
+  PYTHONUNBUFFERED: "1" # live logs, also through `| tee`
+
+defaults:
+  run:
+    shell: bash # an explicit shell runs with -eo pipefail, so `| tee` cannot mask a failure
+
+jobs:
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      # No pip cache: a ruff-only cache would be saved under the same key (the hash of
+      # requirements*.txt) as the full environment and shadow it for the other jobs.
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Install the pinned ruff
+        run: pip install "$(grep -E '^ruff==' requirements.txt)"
+      - name: ruff check
+        id: check
+        run: ruff check --output-format=github .
+      - name: ruff format --check
+        if: success() || steps.check.outcome == 'failure' # report both kinds of problem at once
+        run: ruff format --check .
+
+  test:
+    name: Unit tests (pytest)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - name: Install requirements.txt
+        run: pip install -r requirements.txt
+      - name: pytest
+        id: pytest
+        run: python -m pytest --junitxml=junit.xml 2>&1 | tee pytest.log
+      - name: Test summary
+        if: always() && hashFiles('pytest.log') != ''
+        run: |
+          {
+            echo "### Unit tests ${{ steps.pytest.outcome == 'success' && 'passed' || 'FAILED' }}"
+            echo '```'
+            grep -E '^(FAILED|ERROR) ' pytest.log || true
+            tail -n 1 pytest.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results
+          path: |
+            junit.xml
+            pytest.log
+
+  train:
+    name: Train and track (MLflow)
+    needs: [lint, test]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - name: Install requirements.txt
+        run: pip install -r requirements.txt
+      - name: Prepare data (checksum-verified raw files -> clean CSV)
+        run: python -m cardiorisk.data
+      - name: Train, tune and compare models
+        run: |
+          mkdir -p reports
+          python -m cardiorisk.train 2>&1 | tee reports/train.log
+      - name: Model comparison to the job summary
+        run: cat reports/metrics.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload model
+        uses: actions/upload-artifact@v7
+        with:
+          name: model
+          path: models/
+          if-no-files-found: error
+      # The report and the tracking store are uploaded even when training fails, for debugging.
+      - name: Upload training report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: training-report
+          path: |
+            reports/metrics.json
+            reports/metrics.md
+            reports/figures/model_*.png
+            reports/train.log
+      - name: Upload MLflow tracking store
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mlflow-tracking
+          path: |
+            mlflow.db
+            mlruns/
+
+  docker:
+    name: Docker image + smoke test
+    needs: train
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7 # the smoke test is stdlib-only: nothing to install
+        with:
+          python-version: "3.12"
+      - name: Use the model trained in this run
+        uses: actions/download-artifact@v8
+        with:
+          name: model
+          path: models
+      - name: Build cardiorisk-api:ci
+        run: |
+          docker build \
+            --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+            --tag cardiorisk-api:ci .
+      - name: Start the container
+        id: start
+        run: docker run --detach --name cardiorisk-api --publish 8000:8000 cardiorisk-api:ci
+      - name: Smoke test the container
+        run: python scripts/smoke_test.py http://127.0.0.1:8000 --requests 20
+      - name: Container logs (in full if anything failed)
+        if: always() && steps.start.outcome != 'skipped'
+        run: docker logs --tail ${{ job.status == 'success' && '40' || 'all' }} cardiorisk-api
+      - name: Save the tested image
+        run: docker save cardiorisk-api:ci | gzip > cardiorisk-api.tar.gz
+      - name: Upload image
+        uses: actions/upload-artifact@v7
+        with:
+          name: image
+          path: cardiorisk-api.tar.gz
+          if-no-files-found: error
+          compression-level: 0 # already gzipped
+          retention-days: 1 # only the later jobs of this run need it
+
+  deploy-kind:
+    name: Deploy to kind + monitoring check
+    needs: docker
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Download the tested image
+        uses: actions/download-artifact@v8
+        with:
+          name: image
+      - name: Create a kind cluster
+        uses: helm/kind-action@v1.15.0
+        with:
+          cluster_name: cardiorisk
+      - name: Load the image into kind
+        run: |
+          gunzip cardiorisk-api.tar.gz # kind pipes the archive into `ctr images import` as is
+          kind load image-archive cardiorisk-api.tar --name cardiorisk
+      - name: Apply the kind overlay (API, Prometheus, Grafana)
+        run: kubectl apply -k deploy/k8s/overlays/kind
+      - name: Wait for the rollouts
+        run: |
+          kubectl -n cardiorisk rollout status deployment/cardiorisk-api --timeout=180s
+          kubectl -n cardiorisk rollout status deployment/prometheus --timeout=120s
+          kubectl -n cardiorisk rollout status deployment/grafana --timeout=120s
+      - name: Smoke test through the Service
+        run: |
+          kubectl -n cardiorisk port-forward svc/cardiorisk-api 8000:8000 >/tmp/pf-api.log 2>&1 &
+          python scripts/smoke_test.py http://127.0.0.1:8000 --requests 20
+      - name: Prometheus scrapes the API
+        run: |
+          kubectl -n cardiorisk port-forward svc/prometheus 9090:9090 >/tmp/pf-prometheus.log 2>&1 &
+          for _ in $(seq 24); do # about 2 minutes
+            targets=$(curl -fsS 'http://127.0.0.1:9090/api/v1/targets?state=active' \
+              | jq -c '[.data.activeTargets[] | select(.labels.job == "cardiorisk-api")]') \
+              || targets='[]'
+            if jq -e 'length > 0 and all(.health == "up")' <<<"$targets" >/dev/null; then
+              echo "### Prometheus targets of job cardiorisk-api" >> "$GITHUB_STEP_SUMMARY"
+              jq -r '.[] | "- \(.labels.instance): \(.health)"' <<<"$targets" \
+                | tee -a "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::Prometheus has no healthy cardiorisk-api target after 2 minutes"
+          jq '.[] | {instance: .labels.instance, health, lastError}' <<<"$targets"
+          exit 1
+      - name: Cluster diagnostics
+        if: failure()
+        run: |
+          set +e # print whatever is available
+          kubectl -n cardiorisk get all -o wide
+          kubectl -n cardiorisk get events --sort-by=.lastTimestamp
+          kubectl -n cardiorisk describe pods
+          kubectl -n cardiorisk logs -l app.kubernetes.io/name --all-containers --prefix \
+            --tail=-1 --max-log-requests=10
+          tail -n +1 /tmp/pf-*.log
+
+  publish:
+    name: Publish image
+    needs: deploy-kind
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      packages: write # push to ghcr.io with GITHUB_TOKEN
+    steps:
+      - name: Download the tested image
+        uses: actions/download-artifact@v8
+        with:
+          name: image
+      - name: Load it
+        run: docker load --input cardiorisk-api.tar.gz
+      - uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ vars.REGISTRY_USERNAME || github.actor }}
+          password: ${{ secrets.REGISTRY_PASSWORD || secrets.GITHUB_TOKEN }}
+      - name: Tag and push sha-<commit> and latest
+        run: |
+          image="${REGISTRY}/${IMAGE_NAME}"
+          image="${image,,}" # GHCR rejects upper case, which GitHub owner names often have
+          echo "### Published image" >> "$GITHUB_STEP_SUMMARY"
+          for tag in "sha-${GITHUB_SHA::7}" latest; do
+            docker tag cardiorisk-api:ci "$image:$tag"
+            docker push "$image:$tag"
+            echo "- \`$image:$tag\`" >> "$GITHUB_STEP_SUMMARY"
+          done

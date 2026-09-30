@@ -1,0 +1,37 @@
+# Local stack without Kubernetes: the API image plus the same Prometheus + Grafana monitoring.
+#   docker compose up --build -d  ->  API :8081 (/docs), Prometheus :9090, Grafana :3000
+# Grafana mounts the Kubernetes provisioning and dashboard files, so both stacks show the same
+# dashboard. Anonymous visitors can view; admin signs in with GRAFANA_ADMIN_PASSWORD. Ports are
+# published on 127.0.0.1 only, so the demo password never reaches the local network.
+name: cardiorisk
+
+services:
+  api:
+    build:
+      context: .
+      args: [PIP_INDEX_URL] # a pip mirror when set in the environment, else the Dockerfile's
+    image: cardiorisk-api:1.0.0 # the tag `make docker-build` produces, so both reuse one image
+    ports: ["127.0.0.1:${API_PORT:-8081}:8000"] # `make compose-up PORT=...` if 8081 is taken
+    # Health comes from the image's HEALTHCHECK (Dockerfile); prometheus starts once it passes.
+
+  prometheus:
+    image: prom/prometheus:v3.5.5
+    ports: ["127.0.0.1:9090:9090"]
+    volumes:
+      - ./deploy/compose/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      api:
+        condition: service_healthy
+
+  grafana:
+    image: grafana/grafana:12.4.11
+    ports: ["127.0.0.1:3000:3000"]
+    env_file: deploy/k8s/monitoring/grafana/grafana.env
+    environment:
+      # LOCAL-DEMO DEFAULT, the same one the Kubernetes secretGenerator uses.
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-cardiorisk-demo}
+    volumes:
+      - ./deploy/k8s/monitoring/grafana/datasource.yaml:/etc/grafana/provisioning/datasources/cardiorisk.yaml:ro
+      - ./deploy/k8s/monitoring/grafana/dashboard-provider.yaml:/etc/grafana/provisioning/dashboards/cardiorisk.yaml:ro
+      - ./deploy/k8s/monitoring/grafana/cardiorisk-api.json:/etc/grafana/dashboards/cardiorisk-api.json:ro
+    depends_on: [prometheus]

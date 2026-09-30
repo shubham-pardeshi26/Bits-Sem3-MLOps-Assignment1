@@ -1,0 +1,21 @@
+# Served by minikube's ingress addon (ingress-nginx). No host rule, so the controller's address
+# works as is: http://127.0.0.1/ on macOS while `minikube tunnel` runs.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cardiorisk-api
+  labels:
+    app.kubernetes.io/name: cardiorisk-api
+    app.kubernetes.io/part-of: cardiorisk
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cardiorisk-api
+                port:
+                  name: http

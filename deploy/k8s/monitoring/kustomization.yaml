@@ -1,0 +1,28 @@
+# Prometheus + Grafana for the cardiorisk namespace. The generators append a content hash to each
+# ConfigMap/Secret name, so editing any file below rolls exactly the pods that mount it.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: cardiorisk
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: cardiorisk
+    includeTemplates: true
+resources:
+  - prometheus.yaml
+  - grafana.yaml
+configMapGenerator:
+  - name: prometheus-config
+    files: [prometheus.yml]
+  - name: grafana-env
+    envs: [grafana/grafana.env]
+  - name: grafana-datasources
+    files: [grafana/datasource.yaml]
+  - name: grafana-dashboard-provider
+    files: [grafana/dashboard-provider.yaml]
+  - name: grafana-dashboards
+    files: [grafana/cardiorisk-api.json]
+secretGenerator:
+  # LOCAL-DEMO DEFAULT (docker-compose uses the same one). Before exposing Grafana beyond a
+  # port-forward, override it from an overlay: same name, behavior: replace.
+  - name: grafana-admin
+    literals: [admin-password=cardiorisk-demo]

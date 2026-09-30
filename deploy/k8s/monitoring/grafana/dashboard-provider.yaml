@@ -1,0 +1,11 @@
+# Dashboards are code: loaded from /etc/grafana/dashboards (a ConfigMap in Kubernetes, a read-only
+# bind mount in docker-compose). Change cardiorisk-api.json, not the UI.
+apiVersion: 1
+providers:
+  - name: cardiorisk
+    folder: CardioRisk
+    type: file
+    disableDeletion: true
+    allowUiUpdates: false
+    options:
+      path: /etc/grafana/dashboards

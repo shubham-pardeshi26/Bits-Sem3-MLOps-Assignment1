@@ -1,0 +1,24 @@
+# CI: a throwaway kind cluster in GitHub Actions. The job loads the cardiorisk-api:ci image that
+# passed the Docker smoke test (`kind load image-archive`) and smoke-tests through a port-forward,
+# so there is no Ingress. One replica keeps the job fast.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+  - ../../monitoring
+images:
+  - name: cardiorisk-api
+    newTag: ci
+replicas:
+  - name: cardiorisk-api
+    count: 1
+patches:
+  # kind has no metrics-server, so the HPA only enforces its bounds: with minReplicas 2 it would
+  # scale the Deployment straight back up.
+  - target:
+      kind: HorizontalPodAutoscaler
+      name: cardiorisk-api
+    patch: |-
+      - op: replace
+        path: /spec/minReplicas
+        value: 1

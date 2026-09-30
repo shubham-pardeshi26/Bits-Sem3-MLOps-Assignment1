@@ -1,0 +1,102 @@
+{
+  "version": "4",
+  "family": "logistic_regression",
+  "trained_at": "2026-09-30T05:17:33+00:00",
+  "threshold": 0.5,
+  "metrics": {
+    "cv": {
+      "roc_auc_mean": 0.9073962331956912,
+      "roc_auc_std": 0.028706864752583057,
+      "accuracy_mean": 0.8337247227658187,
+      "accuracy_std": 0.029814054451652316,
+      "precision_mean": 0.8534932243722327,
+      "precision_std": 0.02810713960930328,
+      "recall_mean": 0.8448358928033726,
+      "recall_std": 0.029780110574854125,
+      "f1_mean": 0.8489890227802643,
+      "f1_std": 0.026505174070483976
+    },
+    "test": {
+      "roc_auc": 0.9055475848876136,
+      "accuracy": 0.842391304347826,
+      "precision": 0.8288288288288288,
+      "recall": 0.9019607843137255,
+      "f1": 0.863849765258216
+    },
+    "loso": {
+      "cleveland": {
+        "n": 303,
+        "prevalence": 0.45874587458745875,
+        "roc_auc": 0.8756360765046499,
+        "accuracy": 0.7623762376237624,
+        "precision": 0.6892655367231638,
+        "recall": 0.8776978417266187,
+        "f1": 0.7721518987341772
+      },
+      "hungarian": {
+        "n": 293,
+        "prevalence": 0.36177474402730375,
+        "roc_auc": 0.902128947633942,
+        "accuracy": 0.7952218430034129,
+        "precision": 0.6575342465753424,
+        "recall": 0.9056603773584906,
+        "f1": 0.7619047619047619
+      },
+      "switzerland": {
+        "n": 123,
+        "prevalence": 0.9349593495934959,
+        "roc_auc": 0.7489130434782609,
+        "accuracy": 0.7723577235772358,
+        "precision": 0.9578947368421052,
+        "recall": 0.7913043478260869,
+        "f1": 0.8666666666666667
+      },
+      "va": {
+        "n": 199,
+        "prevalence": 0.7437185929648241,
+        "roc_auc": 0.730259671436142,
+        "accuracy": 0.7587939698492462,
+        "precision": 0.8424657534246576,
+        "recall": 0.831081081081081,
+        "f1": 0.8367346938775511
+      }
+    }
+  },
+  "features": [
+    "age",
+    "sex",
+    "cp",
+    "trestbps",
+    "chol",
+    "fbs",
+    "restecg",
+    "thalach",
+    "exang",
+    "oldpeak",
+    "slope",
+    "ca",
+    "thal"
+  ],
+  "params": {
+    "C": 0.3,
+    "class_weight": null,
+    "l1_ratio": 0.5
+  },
+  "mlflow_run_id": "bf30234e66d4464b8f8857c6a051d7f8",
+  "mlflow_model_uri": "models:/cardiorisk-classifier/4",
+  "training_session": "20260930-051733",
+  "sklearn_version": "1.9.1",
+  "n_train": 734,
+  "n_test": 184,
+  "class_balance": {
+    "train": {
+      "no_heart_disease": 328,
+      "heart_disease": 406
+    },
+    "test": {
+      "no_heart_disease": 82,
+      "heart_disease": 102
+    }
+  },
+  "data_sha256": "9e4e3aa7765b6c179ce2bad335a8ba246e8b156f485b0814523821f61266b735"
+}

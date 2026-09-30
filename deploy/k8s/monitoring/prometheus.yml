@@ -1,0 +1,36 @@
+# Prometheus for Kubernetes. Pods opt in with the prometheus.io/* annotations, so replicas added
+# by the HPA are scraped as soon as they start. docker-compose uses ../../compose/prometheus.yml.
+global:
+  scrape_interval: 5s # same as compose, so the Grafana dashboard behaves identically in both
+
+scrape_configs:
+  - job_name: cardiorisk-api
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: [cardiorisk]
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        regex: "true"
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        regex: (.+)
+        target_label: __metrics_path__
+      # Assumes IPv4 pod IPs (minikube, kind and managed-cluster defaults); IPv6 would need [$1].
+      - source_labels:
+          - __meta_kubernetes_pod_ip
+          - __meta_kubernetes_pod_annotation_prometheus_io_port
+        regex: (.+);(\d+)
+        replacement: $1:$2
+        target_label: __address__
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+      # Pod name instead of IP:port keeps dashboard legends readable (compose shows api:8000).
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: instance
+
+  - job_name: prometheus
+    static_configs:
+      - targets: [localhost:9090]

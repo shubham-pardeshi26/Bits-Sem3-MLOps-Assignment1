@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.DS_Store
+# MLflow tracking store (local runs; CI uploads its own copy as an artifact)
+mlflow.db
+mlruns/
+mlartifacts/
+# Local tooling (IDE settings, Claude Code session state)
+.idea/
+.claude/
+# Course material: kept locally, not published
+MLOps Assignment 1 Instructions.pdf
