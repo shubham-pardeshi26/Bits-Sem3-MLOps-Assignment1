@@ -15,7 +15,7 @@ images:
     #   ECR         <account>.dkr.ecr.<region>.amazonaws.com/cardiorisk-api
     #   GAR         <region>-docker.pkg.dev/<project>/<repository>/cardiorisk-api
     #   ACR         <registry>.azurecr.io/cardiorisk-api
-    newName: ghcr.io/OWNER/REPO
+    newName: ghcr.io/shubham-pardeshi26/bits-sem3-mlops-assignment1
     # Prefer the immutable sha-<7> tag: re-applying an unchanged "latest" rolls nothing, and nodes
     # that already cached it keep the old image (imagePullPolicy IfNotPresent).
     newTag: latest

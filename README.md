@@ -1,6 +1,6 @@
 # CardioRisk: heart disease risk, from UCI data to a monitored Kubernetes API
 
-[![CI/CD](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci.yml)
+[![CI/CD](https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/actions/workflows/ci.yml/badge.svg)](https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/actions/workflows/ci.yml)
 
 CardioRisk predicts the presence of heart disease from 13 routine clinical measurements. It is
 trained on all four hospitals of the UCI Heart Disease dataset (918 patients after cleaning), not
@@ -11,10 +11,6 @@ builds, deploys the image to a throwaway kind cluster and publishes it.
 BITS Pilani AIMLCZG523 (MLOps), Assignment 1. Full write-up: [reports/REPORT.md](reports/REPORT.md)
 (also as [reports/report.docx](reports/report.docx) and reports/report.pdf); evidence:
 [screenshots/](screenshots/).
-
-> **Placeholder:** `OWNER/REPO` in the URLs on this page (and in
-> `deploy/k8s/overlays/cloud/kustomization.yaml`) stands for the GitHub repository path. Replace it
-> after pushing.
 
 ## Contents
 
@@ -495,7 +491,7 @@ container listens on 8000), `URL` (`http://127.0.0.1:$(PORT)`), `MLFLOW_PORT` (5
 | Deployment manifests | `deploy/k8s/` (Kustomize), `docker-compose.yml` |
 | Screenshots | `screenshots/` (checklist: [screenshots/README.md](screenshots/README.md)) |
 | Report | [reports/REPORT.md](reports/REPORT.md); `make report` builds the editable [reports/report.docx](reports/report.docx), `make report-pdf` the final reports/report.pdf (needs Google Chrome); rebuild both after adding the screenshots |
-| Link to code repository | `https://github.com/OWNER/REPO` (replace the placeholder) |
+| Link to code repository | <https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1> |
 | API access | local: [Using the API](#using-the-api), [Docker](#docker), [Kubernetes on minikube](#kubernetes-on-minikube); no public deployment |
 | Pipeline video | recorded separately; add its link here |
 
