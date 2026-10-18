@@ -1,6 +1,6 @@
 {
   "champion": "logistic_regression",
-  "training_session": "20260930-051733",
+  "training_session": "20261018-100542",
   "families": {
     "baseline_majority": {
       "cv": {
@@ -23,8 +23,8 @@
         "f1": 0.7132867132867133
       },
       "params": {},
-      "run_id": "7c373a072176488e8cb51b290211b309",
-      "search_seconds": 2.8
+      "run_id": "d27b0f9ecb7c42ff85f4a6eb9e0808f8",
+      "search_seconds": 2.6
     },
     "logistic_regression": {
       "cv": {
@@ -51,8 +51,8 @@
         "class_weight": null,
         "l1_ratio": 0.5
       },
-      "run_id": "bf30234e66d4464b8f8857c6a051d7f8",
-      "search_seconds": 1.0
+      "run_id": "fb266051301c4320b872e83b27abe66e",
+      "search_seconds": 2.6
     },
     "random_forest": {
       "cv": {
@@ -80,7 +80,7 @@
         "min_samples_leaf": 1,
         "n_estimators": 500
       },
-      "run_id": "78c120f4f0474e819f2e0441c4a964e4",
+      "run_id": "c9997f1dae1f4f109fdf06bd41b2c252",
       "search_seconds": 6.3
     },
     "hist_gradient_boosting": {
@@ -108,8 +108,8 @@
         "learning_rate": 0.03,
         "max_leaf_nodes": 4
       },
-      "run_id": "f80a9624199144f99195293ff8bd9770",
-      "search_seconds": 1.1
+      "run_id": "11febaa4828d4836a723142449e24efe",
+      "search_seconds": 1.0
     }
   },
   "loso": {

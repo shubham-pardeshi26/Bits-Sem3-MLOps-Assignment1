@@ -2,6 +2,8 @@
 # Everything else (.venv, data, mlruns, mlflow.db, notebooks, tests, reports, deploy, .git, ...)
 # never reaches the build context.
 *
+# minikube image build reads the Dockerfile from the filtered context (docker build does not).
+!Dockerfile
 !requirements-serve.txt
 !src/
 !models/

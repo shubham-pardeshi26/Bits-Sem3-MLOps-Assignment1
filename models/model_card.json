@@ -1,7 +1,7 @@
 {
-  "version": "4",
+  "version": "3",
   "family": "logistic_regression",
-  "trained_at": "2026-09-30T05:17:33+00:00",
+  "trained_at": "2026-10-18T10:05:42+00:00",
   "threshold": 0.5,
   "metrics": {
     "cv": {
@@ -82,9 +82,9 @@
     "class_weight": null,
     "l1_ratio": 0.5
   },
-  "mlflow_run_id": "bf30234e66d4464b8f8857c6a051d7f8",
-  "mlflow_model_uri": "models:/cardiorisk-classifier/4",
-  "training_session": "20260930-051733",
+  "mlflow_run_id": "fb266051301c4320b872e83b27abe66e",
+  "mlflow_model_uri": "models:/cardiorisk-classifier/3",
+  "training_session": "20261018-100542",
   "sklearn_version": "1.9.1",
   "n_train": 734,
   "n_test": 184,
