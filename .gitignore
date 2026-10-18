@@ -14,3 +14,5 @@ mlartifacts/
 .claude/
 # Course material: kept locally, not published
 MLOps Assignment 1 Instructions.pdf
+# Personal study notes (local only)
+study/
