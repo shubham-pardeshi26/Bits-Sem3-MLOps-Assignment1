@@ -495,7 +495,7 @@ container listens on 8000), `URL` (`http://127.0.0.1:$(PORT)`), `MLFLOW_PORT` (5
 | Report | [reports/REPORT.md](reports/REPORT.md); `make report` builds the editable [reports/report.docx](reports/report.docx), `make report-pdf` the final reports/report.pdf (needs Google Chrome); rebuild both after adding the screenshots |
 | Link to code repository | <https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1> |
 | API access | local: [Using the API](#using-the-api), [Docker](#docker), [Kubernetes on minikube](#kubernetes-on-minikube); no public deployment |
-| Pipeline video | recorded separately; add its link here |
+| Pipeline video | linked on the first page of the report ([reports/report.pdf](reports/report.pdf)) |
 
 **Screenshot evidence** (captured by running the pipeline once; how to reach each view is in
 [screenshots/README.md](screenshots/README.md)):
