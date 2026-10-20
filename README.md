@@ -10,7 +10,9 @@ builds, deploys the image to a throwaway kind cluster and publishes it.
 
 BITS Pilani AIMLCZG523 (MLOps), Assignment 1. Full write-up: [reports/REPORT.md](reports/REPORT.md)
 (also as [reports/report.docx](reports/report.docx) and reports/report.pdf); evidence:
-[screenshots/](screenshots/).
+[screenshots/](screenshots/). Slide walkthrough of the whole pipeline:
+[presentation](https://shubham-pardeshi26.github.io/Bits-Sem3-MLOps-Assignment1/presentation/)
+(source: [presentation/index.html](presentation/index.html)).
 
 ## Contents
 

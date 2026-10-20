@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CardioRisk · end-to-end MLOps pipeline</title>
+<style>
+:root{--bg:#0f1115;--fg:#e8eaed;--muted:#a3acb9;--card:#171b22;--line:#2a2f37;--accent:#5aa2f0;--accent2:#f08a4b;--note:#1f1830}
+*{box-sizing:border-box}
+html{scroll-snap-type:y mandatory}
+body{margin:0;background:var(--bg);color:var(--fg);font:20px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+section{min-height:100vh;scroll-snap-align:start;padding:32px 56px 44px;display:flex;flex-direction:column;border-bottom:1px solid var(--line)}
+h1{font-size:50px;margin:0 0 8px}
+h2{font-size:34px;margin:0 0 12px}
+h2 .n{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:10px}
+.sub{color:var(--muted);font-size:23px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+figure{margin:0}
+figure img{width:100%;max-height:64vh;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:8px;cursor:zoom-in}
+.grid img,.grid3 img{max-height:40vh}
+figcaption{color:var(--muted);font-size:15px;margin-top:4px}
+ul.points{font-size:21px;margin:14px 0 0;padding-left:26px}
+ul.points li{margin:4px 0}
+.demo{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.demo a{display:inline-block;border:1.5px solid var(--accent2);color:var(--fg);text-decoration:none;border-radius:999px;padding:4px 14px;font-size:15.5px;background:#1d1610}
+.demo a.local{border-style:dashed}
+.demo a:hover{background:#2b1e12}
+.notes{display:none;background:var(--note);border-left:5px solid #a371f7;border-radius:8px;padding:10px 16px;margin-top:14px;font-size:17px}
+body.show-notes .notes{display:block}
+table{border-collapse:collapse;font-size:20px;margin:6px 0}
+th,td{border-bottom:1px solid var(--line);padding:6px 14px;text-align:left}
+th{color:var(--muted);font-weight:600}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#1c2128;padding:1px 6px;border-radius:5px;font-size:.86em}
+pre{background:#1c2128;border:1px solid var(--line);border-radius:10px;padding:12px 18px;font-size:16.5px;line-height:1.5;overflow:auto;margin:8px 0}
+pre code{background:none;padding:0}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+.flow span.b{border:2px solid var(--accent);border-radius:10px;padding:7px 12px;background:var(--card);font-size:18px}
+.flow span.a{color:var(--muted);font-size:24px}
+.live{border:3px solid var(--accent2);border-radius:14px;padding:16px 24px;background:#1d1610}
+.kpis{display:flex;gap:16px;flex-wrap:wrap;margin:10px 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 18px;min-width:170px}
+.kpi b{display:block;font-size:34px;color:var(--accent)}
+.kpi span{color:var(--muted);font-size:15px}
+.hud{position:fixed;right:14px;bottom:10px;color:var(--muted);font-size:13px;opacity:.75;background:#0f1115cc;padding:2px 8px;border-radius:6px}
+#zoom{position:fixed;inset:0;background:#000d;display:none;align-items:center;justify-content:center;z-index:9;cursor:zoom-out}
+#zoom img{max-width:96vw;max-height:94vh;background:#fff;border-radius:6px}
+@media (max-width:1000px){.grid,.grid3{grid-template-columns:1fr}section{padding:20px}}
+</style>
+</head>
+<body>
+<div class="hud"><span id="count"></span> · ↓/Space next · ↑ back · N notes · click image to zoom</div>
+<div id="zoom"><img alt=""></div>
+
+<!-- 1 -->
+<section>
+  <h1>CardioRisk</h1>
+  <div class="sub">An end-to-end MLOps pipeline for heart-disease risk prediction</div>
+  <p style="font-size:26px;margin-top:26px">Shubham Pardeshi · BITS ID 2025ae05144<br>AIMLCZG523 Machine Learning Operations · Assignment 1</p>
+  <div class="kpis">
+    <div class="kpi"><b>918</b><span>patients, 4 hospitals</span></div>
+    <div class="kpi"><b>0.907</b><span>CV ROC-AUC (champion)</span></div>
+    <div class="kpi"><b>0.90</b><span>hold-out recall</span></div>
+    <div class="kpi"><b>6</b><span>CI/CD jobs, all green</span></div>
+  </div>
+  <div class="demo">
+    <a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1" target="_blank">Repository</a>
+    <a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/blob/main/reports/report.pdf" target="_blank">Report (PDF)</a>
+    <a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/actions" target="_blank">CI/CD runs</a>
+  </div>
+  <aside class="notes">Introduce yourself and the goal: predict heart-disease risk from routine clinical data and run it as a reproducible, tested, deployed and monitored API.</aside>
+</section>
+
+<!-- 2 -->
+<section>
+  <h2><span class="n">01</span>Problem and dataset</h2>
+  <table>
+    <tr><th>Hospital</th><th>Patients</th><th>Disease rate</th></tr>
+    <tr><td>Cleveland</td><td>303</td><td>46%</td></tr>
+    <tr><td>Hungary</td><td>293</td><td>36%</td></tr>
+    <tr><td>Switzerland</td><td>123</td><td>93%</td></tr>
+    <tr><td>VA Long Beach</td><td>199</td><td>74%</td></tr>
+    <tr><td><b>Total</b></td><td><b>918</b> (920 raw, 2 duplicates)</td><td>55%</td></tr>
+  </table>
+  <ul class="points">
+    <li>UCI Heart Disease: 13 clinical inputs; target = disease present (<code>num &gt; 0</code>)</li>
+    <li>All four hospitals, not only Cleveland: real missing data and very different prevalence</li>
+  </ul>
+  <div class="demo"><a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/tree/main/data" target="_blank">data/ folder</a></div>
+  <aside class="notes">Most tutorials use only Cleveland because it is complete; using all four sites makes cleaning and evaluation more realistic.</aside>
+</section>
+
+<!-- 3 -->
+<section>
+  <h2><span class="n">02</span>Architecture</h2>
+  <figure><img src="../reports/figures/architecture.png" alt="Architecture"></figure>
+  <ul class="points"><li>Data → training + MLflow → one model artifact → Docker (FastAPI) → Kubernetes → Prometheus + Grafana, all automated by GitHub Actions</li></ul>
+  <div class="demo"><a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/blob/main/Makefile" target="_blank">Makefile (one target per stage)</a></div>
+  <aside class="notes">Walk the diagram left to right; mention that every stage is one make target and CI runs the same commands.</aside>
+</section>
+
+<!-- 4 -->
+<section>
+  <h2><span class="n">03</span>Data acquisition and cleaning</h2>
+  <div class="grid">
+    <figure><img src="../reports/figures/eda_missingness_by_site.png" alt=""><figcaption>Missing values by site</figcaption></figure>
+    <figure><img src="../reports/figures/eda_class_balance.png" alt=""><figcaption>Class balance overall and per site</figcaption></figure>
+  </div>
+  <ul class="points">
+    <li>Raw files verified by pinned <b>SHA-256</b> checksums; no network needed when they match</li>
+    <li><code>?</code> and impossible zeros (cholesterol, blood pressure) → missing; duplicates dropped</li>
+    <li>Different tests per hospital → stratify by site × class, keep missing indicators, never use site as a feature</li>
+  </ul>
+  <div class="demo">
+    <a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/blob/main/src/cardiorisk/data.py" target="_blank">data.py</a>
+    <a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/blob/main/notebooks/01_eda.ipynb" target="_blank">EDA notebook</a>
+  </div>
+  <aside class="notes">Highlight: ca 66% and thal 53% missing overall; Switzerland never recorded cholesterol; prevalence 36–93%.</aside>
+</section>
+
+<!-- 5 -->
+<section>
+  <h2><span class="n">04</span>Exploratory analysis</h2>
+  <div class="grid">
+    <figure><img src="../reports/figures/eda_numeric_distributions.png" alt=""><figcaption>Numeric features by class</figcaption></figure>
+    <figure><img src="../reports/figures/eda_max_hr_vs_age.png" alt=""><figcaption>Max heart rate vs age, with the 220 − age line</figcaption></figure>
+  </div>
+  <ul class="points">
+    <li>Diseased patients: older, lower max heart rate, more ST depression</li>
+    <li>Derived feature <code>hr_achieved_frac = thalach / (220 − age)</code></li>
+  </ul>
+  <div class="demo">
+    <a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/blob/main/src/cardiorisk/eda.py" target="_blank">eda.py</a>
+    <a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/tree/main/reports/figures" target="_blank">all figures</a>
+  </div>
+  <aside class="notes">The fraction of age-predicted maximum heart rate reached is a known cardiac risk marker (chronotropic incompetence).</aside>
+</section>
+
+<!-- 6 -->
+<section>
+  <h2><span class="n">05</span>Feature pipeline: preprocessing inside the model</h2>
+  <div class="flow">
+    <span class="b">13 raw inputs</span><span class="a">→</span>
+    <span class="b">+ hr_achieved_frac</span><span class="a">→</span>
+    <span class="b">impute + missing indicators</span><span class="a">→</span>
+    <span class="b">scale numerics</span><span class="a">→</span>
+    <span class="b">one-hot (NaN = own category)</span><span class="a">→</span>
+    <span class="b">model</span>
+  </div>
+<pre><code>Pipeline([
+    ("features", FunctionTransformer(add_clinical_features, ...)),
+    ("preprocess", ColumnTransformer([
+        ("num", make_pipeline(SimpleImputer(strategy="median", add_indicator=True), StandardScaler()), NUMERIC),
+        ("bin", SimpleImputer(strategy="most_frequent", add_indicator=True), BINARY),
+        ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), CATEGORICAL),
+    ])),
+    ("model", model),
+])</code></pre>
+  <ul class="points"><li>Saved as one artifact (<code>models/cardiorisk_model.joblib</code>); API and CLI share one scoring function → no training–serving skew</li></ul>
+  <div class="demo"><a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/blob/main/src/cardiorisk/features.py" target="_blank">features.py</a></div>
+  <aside class="notes">Because the imputers and scaler are fitted inside the pipeline, they only ever see training folds: no leakage.</aside>
+</section>
+
+<!-- 7 -->
+<section>
+  <h2><span class="n">06</span>Model development and selection</h2>
+  <figure><img src="../reports/figures/model_comparison.png" alt=""></figure>
+  <ul class="points">
+    <li>Baseline, elastic-net logistic regression, random forest, gradient boosting; grid search, 5-fold CV stratified by site × class (85 configurations)</li>
+    <li>Selection on CV ROC-AUC, never on the test set → <b>logistic regression, 0.907 ± 0.029</b></li>
+  </ul>
+  <div class="demo">
+    <a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/blob/main/src/cardiorisk/train.py" target="_blank">train.py</a>
+    <a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/blob/main/reports/metrics.md" target="_blank">metrics table</a>
+  </div>
+  <aside class="notes">Tree models are within one CV standard deviation; the linear model is simpler to serve and to explain.</aside>
+</section>
+
+<!-- 8 -->
+<section>
+  <h2><span class="n">07</span>Champion on the hold-out (184 patients)</h2>
+  <div class="grid">
+    <figure><img src="../reports/figures/model_champion_roc.png" alt=""></figure>
+    <figure><img src="../reports/figures/model_champion_confusion_matrix.png" alt=""></figure>
+  </div>
+  <ul class="points"><li>ROC-AUC 0.906 · accuracy 0.842 · precision 0.829 · <b>recall 0.902</b> (92 of 102 sick patients caught)</li></ul>
+  <aside class="notes">10 missed, 19 false alarms; for screening, recall is the metric that matters most.</aside>
+</section>
+
+<!-- 9 -->
+<section>
+  <h2><span class="n">08</span>Does it transfer to a new hospital?</h2>
+  <figure><img src="../reports/figures/model_loso_by_site.png" alt=""></figure>
+  <ul class="points"><li>Leave-one-site-out: Cleveland 0.88, Hungary 0.90, but Switzerland 0.75 and VA 0.73 → a new hospital needs local validation</li></ul>
+  <aside class="notes">Different prevalence and recording practice cause the drop; an honest limitation and the basis for future work.</aside>
+</section>
+
+<!-- 10 -->
+<section>
+  <h2><span class="n">09</span>Experiment tracking with MLflow</h2>
+  <div class="grid">
+    <figure><img src="../screenshots/01_mlflow_experiment_runs.png" alt=""><figcaption>Family runs with nested grid runs</figcaption></figure>
+    <figure><img src="../screenshots/02_mlflow_champion_run-main-page.png" alt=""><figcaption>Champion run: metrics and parameters</figcaption></figure>
+  </div>
+  <ul class="points"><li>Every configuration is a run: parameters, CV metrics, per-fold scores; family runs add test metrics, plots, CV table, dataset and model</li></ul>
+  <div class="demo"><a class="local" href="http://127.0.0.1:5001" target="_blank">MLflow UI (local)</a></div>
+  <aside class="notes">Switch to the live MLflow UI here if it is running (make mlflow-ui).</aside>
+</section>
+
+<!-- 11 -->
+<section>
+  <h2><span class="n">10</span>MLflow artifacts, comparison and registry</h2>
+  <div class="grid3">
+    <figure><img src="../screenshots/02_mlflow_champion_run-artifact-plots.png" alt=""><figcaption>Artifacts: plots, cv_results.csv</figcaption></figure>
+    <figure><img src="../screenshots/03_mlflow_compare_runs.png" alt=""><figcaption>Parallel coordinates of the grid</figcaption></figure>
+    <figure><img src="../screenshots/04_mlflow_model_registry.png" alt=""><figcaption>Registry: @champion alias</figcaption></figure>
+  </div>
+  <ul class="points"><li>Champion registered as <code>cardiorisk-classifier@champion</code>; the model card links the served file to its run</li></ul>
+  <aside class="notes">The compare view shows how C and l1_ratio relate to the CV score.</aside>
+</section>
+
+<!-- 12 -->
+<section>
+  <h2><span class="n">11</span>CI/CD with GitHub Actions</h2>
+<pre><code>lint ─┐
+test ─┴─▶ train ──▶ docker (build + smoke) ──▶ deploy-kind (smoke + Prometheus check) ──▶ publish (GHCR, main only)</code></pre>
+  <div class="grid">
+    <figure><img src="../screenshots/05_github_actions_pipeline.png" alt=""><figcaption>Six jobs, all green</figcaption></figure>
+    <figure><img src="../screenshots/06_github_actions_summary.png" alt=""><figcaption>Run summary: tests, model table, Prometheus check</figcaption></figure>
+  </div>
+  <div class="demo">
+    <a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/blob/main/.github/workflows/ci.yml" target="_blank">ci.yml</a>
+    <a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/actions" target="_blank">live runs</a>
+    <a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/tree/main/test" target="_blank">test/ (39 tests)</a>
+  </div>
+  <aside class="notes">Any failing step stops the pipeline (bash pipefail, job dependencies); the model trained in the run is the one baked into the image.</aside>
+</section>
+
+<!-- 13 -->
+<section>
+  <h2><span class="n">12</span>Artifacts and published image</h2>
+  <div class="grid">
+    <figure><img src="../screenshots/07_github_actions_artifacts.png" alt=""><figcaption>Artifacts of the run</figcaption></figure>
+    <figure><img src="../screenshots/08_ghcr_package.png" alt=""><figcaption>GHCR package: sha-&lt;7&gt; and latest</figcaption></figure>
+  </div>
+  <ul class="points"><li>Build once, publish exactly the tested image; registry configurable via repository variables</li></ul>
+  <div class="demo"><a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/pkgs/container/bits-sem3-mlops-assignment1" target="_blank">GHCR package</a></div>
+  <aside class="notes">Artifacts: test results, model, training report, MLflow store, image archive.</aside>
+</section>
+
+<!-- 14 -->
+<section>
+  <h2><span class="n">13</span>Containerised API</h2>
+  <div class="grid3">
+    <figure><img src="../screenshots/09_docker_build.png" alt=""><figcaption>Build + smoke test</figcaption></figure>
+    <figure><img src="../screenshots/09_docker_build_run.png" alt=""><figcaption>Container JSON logs</figcaption></figure>
+    <figure><img src="../screenshots/10_fastapi_docs.png" alt=""><figcaption>Swagger /docs: /predict</figcaption></figure>
+  </div>
+  <ul class="points">
+    <li>Slim image: serving dependencies + trained pipeline only; non-root; health check</li>
+    <li><code>POST /predict</code>: JSON in → prediction, label, confidence; invalid input → 422 without echoing patient values</li>
+  </ul>
+  <div class="demo">
+    <a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/blob/main/Dockerfile" target="_blank">Dockerfile</a>
+    <a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/blob/main/src/cardiorisk/api.py" target="_blank">api.py</a>
+    <a class="local" href="http://127.0.0.1:8081/docs" target="_blank">/docs (local)</a>
+  </div>
+  <aside class="notes">Show /docs → Try it out with the sample patient if the API is running.</aside>
+</section>
+
+<!-- 15 -->
+<section>
+  <h2><span class="n">14</span>Kubernetes deployment (minikube)</h2>
+  <div class="grid">
+    <figure><img src="../screenshots/11_k8s_resources.png" alt=""><figcaption>Pods, LoadBalancer :8081, Ingress, HPA</figcaption></figure>
+    <figure><img src="../screenshots/12_k8s_smoke_test.png" alt=""><figcaption>Smoke test via LoadBalancer and Ingress</figcaption></figure>
+  </div>
+  <ul class="points">
+    <li>Kustomize base + overlays (minikube, kind for CI, cloud) · HPA 2–5 pods · zero-downtime rolling updates</li>
+    <li>Probes on <code>/health</code> · hardened pods (restricted pod security) · LoadBalancer Service and nginx Ingress</li>
+  </ul>
+  <div class="demo"><a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/tree/main/deploy/k8s" target="_blank">deploy/k8s manifests</a></div>
+  <aside class="notes">The same base manifests are deployed to a throwaway kind cluster in every CI run.</aside>
+</section>
+
+<!-- 16 -->
+<section>
+  <h2><span class="n">15</span>Monitoring and logging</h2>
+  <div class="grid3">
+    <figure><img src="../screenshots/13_prometheus_targets.png" alt=""><figcaption>Prometheus: every API pod UP</figcaption></figure>
+    <figure><img src="../screenshots/14_grafana_dashboard.png" alt=""><figcaption>Grafana dashboard</figcaption></figure>
+    <figure><img src="../screenshots/15_api_json_logs.png" alt=""><figcaption>JSON request/prediction logs</figcaption></figure>
+  </div>
+  <ul class="points"><li>Metrics: requests, latency, predictions per label, probability distribution (drift signal), model version · JSON logs linked by request id, no patient data</li></ul>
+  <div class="demo">
+    <a class="local" href="http://127.0.0.1:9090/targets" target="_blank">Prometheus (local)</a>
+    <a class="local" href="http://127.0.0.1:3000" target="_blank">Grafana (local)</a>
+    <a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/tree/main/deploy/k8s/monitoring" target="_blank">monitoring config</a>
+  </div>
+  <aside class="notes">Prometheus discovers new pods automatically through Kubernetes and scrapes every 5 s.</aside>
+</section>
+
+<!-- 17 -->
+<section>
+  <h2><span class="n">16</span>Live demo: smoke test and load test</h2>
+  <div class="live">
+<pre><code>make smoke                         # through the LoadBalancer :8081
+make smoke URL=http://127.0.0.1    # through the Ingress
+make load  URL=http://127.0.0.1    # smoke + 300 varied patients (10% invalid)</code></pre>
+    <p style="margin:6px 0 0">Then watch the Grafana dashboard update.</p>
+  </div>
+  <div class="demo">
+    <a class="local" href="http://127.0.0.1:3000" target="_blank">Grafana (local)</a>
+    <a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/blob/main/scripts/smoke_test.py" target="_blank">smoke_test.py</a>
+  </div>
+  <aside class="notes">Needs minikube tunnel and make k8s-forward running. Fallback: make compose-up, make smoke, make load, Grafana :3000, make compose-down (stop the tunnel first).</aside>
+</section>
+
+<!-- 18 -->
+<section>
+  <h2><span class="n">17</span>Summary and next steps</h2>
+  <ul class="points" style="font-size:24px">
+    <li>Reproducible: checksum-pinned data, pinned dependencies, seeded training</li>
+    <li>Champion: logistic regression · CV ROC-AUC 0.907 · hold-out 0.906 · recall 0.90</li>
+    <li>Tested, containerised, deployed on Kubernetes, monitored, automated end to end</li>
+    <li>Next: nested site-level tuning, calibration, drift alerts, cloud deployment via the cloud overlay</li>
+  </ul>
+  <p style="font-size:30px;margin-top:24px">Thank you.</p>
+  <div class="demo"><a href="https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1" target="_blank">Repository</a></div>
+</section>
+
+<script>
+const slides = [...document.querySelectorAll("section")];
+const count = document.getElementById("count");
+const zoom = document.getElementById("zoom");
+function current() {
+  const y = window.scrollY + window.innerHeight / 3;
+  let i = 0;
+  slides.forEach((s, k) => { if (s.offsetTop <= y) i = k; });
+  return i;
+}
+function update() { count.textContent = `${current() + 1} / ${slides.length}`; }
+document.addEventListener("scroll", update, { passive: true });
+document.addEventListener("keydown", e => {
+  if (e.key === "n" || e.key === "N") { document.body.classList.toggle("show-notes"); return; }
+  if (e.key === "Escape") { zoom.style.display = "none"; return; }
+  const next = ["ArrowDown", "ArrowRight", "PageDown", " "].includes(e.key);
+  const prev = ["ArrowUp", "ArrowLeft", "PageUp"].includes(e.key);
+  if (!next && !prev) return;
+  e.preventDefault();
+  const i = Math.min(slides.length - 1, Math.max(0, current() + (next ? 1 : -1)));
+  slides[i].scrollIntoView({ behavior: "smooth" });
+});
+document.querySelectorAll("figure img").forEach(img => img.addEventListener("click", () => {
+  zoom.querySelector("img").src = img.src; zoom.style.display = "flex";
+}));
+zoom.addEventListener("click", () => { zoom.style.display = "none"; });
+update();
+</script>
+</body>
+</html>
