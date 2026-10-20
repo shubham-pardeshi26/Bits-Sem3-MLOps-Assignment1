@@ -3,7 +3,7 @@ title: "CardioRisk: an end-to-end MLOps pipeline for heart-disease risk predicti
 subtitle: "AIMLCZG523 Machine Learning Operations, Assignment 1"
 author:
   - "Shubham Pardeshi (BITS ID: 2025ae05144)"
-date: "30 September 2026"
+date: "20 October 2026"
 ---
 
 **Code repository:** <https://github.com/shubham-pardeshi26/Bits-Sem3-MLOps-Assignment1/>
