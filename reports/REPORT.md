@@ -239,7 +239,7 @@ champion run adds the tag `champion = true`, the `loso_<site>_*` metrics and the
 plot, and registers a new version of `cardiorisk-classifier` with the alias `champion`.
 
 Nested runs keep the top-level list at four rows while recording every grid point (Figures
-18-21, Appendix C). The registry uses an alias instead of the stages MLflow 3 deprecates; moving
+18-22, Appendix C). The registry uses an alias instead of the stages MLflow 3 deprecates; moving
 `@champion` is the promotion step. `model_card.json` and `/health` report the registry version.
 
 # 7. Model packaging and reproducibility
@@ -307,7 +307,7 @@ curl -s -X POST http://127.0.0.1:8081/predict \
 Pydantic rejects codes outside the UCI codebook, implausible measurements and unknown fields, so a
 misspelt field cannot silently become a missing value; only `age`, `sex` and `cp` are required, and
 the 422 response does not echo the submitted values. `make docker-build`, `make docker-run` and
-`make smoke` prove the image (Figures 24, 25, Appendix C): the smoke test checks `/health`, the
+`make smoke` prove the image (Figures 25-27, Appendix C): the smoke test checks `/health`, the
 response contract, 422 for invalid payloads and `/metrics`.
 
 # 10. Production deployment
@@ -341,7 +341,7 @@ For a managed cluster only the lines in `overlays/cloud` (image, Ingress class) 
 `cardiorisk_predictions_total` by label and `cardiorisk_prediction_probability` (a coarse drift
 signal) for the predictions; and `cardiorisk_model_info` with the version each pod serves. The
 `route` label is the route template, so random URLs cannot create unbounded series. Prometheus
-discovers annotated pods and scrapes every 5 s (Figure 26, Appendix C). Grafana is provisioned from
+discovers annotated pods and scrapes every 5 s (Figure 28, Appendix C). Grafana is provisioned from
 ConfigMaps; the "CardioRisk API" dashboard (Figure 10) shows pods up, model version, prediction
 mix, request rate, error share, `/predict` latency p50/p95/p99, memory and the predicted-probability
 distribution. `make load` sends 300 varied requests, 10% invalid, so every panel has data.
@@ -351,7 +351,7 @@ distribution. `make load` sends 300 varied requests, 10% invalid, so every panel
 **Logs.** Every request writes one JSON line to stdout (`event`, `request_id`, `method`, `route`,
 `status`, `duration_ms`) and every prediction one more (`label`, `probability_disease`,
 `model_version`), joined by the request id: the caller's `X-Request-ID` or a generated one
-(Figure 27, Appendix C). Probes and scrapes are logged at DEBUG, so the INFO log shows real
+(Figure 29, Appendix C). Probes and scrapes are logged at DEBUG, so the INFO log shows real
 traffic. Patient features are never logged, which a test enforces.
 
 # 12. Limitations and future work
@@ -411,13 +411,15 @@ champion's permutation importance (Section 5.4) and the leave-one-site-out chart
 
 |   |   |
 | --- | --- |
-| ![Figure 18. MLflow experiment view: the four family runs of a session with their key metrics.](../screenshots/01_mlflow_experiment_runs.png) | ![Figure 19. The champion run: parameters, metrics and plots artifacts.](../screenshots/02_mlflow_champion_run.png) |
-| *Figure 18. MLflow experiment: the four family runs of a session.* | *Figure 19. MLflow champion run: parameters, metrics, `plots/`.* |
-| ![Figure 20. Parallel-coordinates comparison of the 36 nested logistic-regression runs.](../screenshots/03_mlflow_compare_runs.png) | ![Figure 21. Model registry: cardiorisk-classifier with the @champion alias.](../screenshots/04_mlflow_model_registry.png) |
-| *Figure 20. Compare view of the 36 nested logistic-regression runs.* | *Figure 21. Registry: `cardiorisk-classifier@champion`.* |
-| ![Figure 22. Artifacts attached to the workflow run.](../screenshots/07_github_actions_artifacts.png) | ![Figure 23. The GHCR package with the sha-7 and latest tags.](../screenshots/08_ghcr_package.png) |
-| *Figure 22. Artifacts of the workflow run.* | *Figure 23. GHCR package, tags `sha-<7>` and `latest`.* |
-| ![Figure 24. Terminal: make docker-build, make docker-run and make smoke passing.](../screenshots/09_docker_build_run.png) | ![Figure 25. Swagger UI with a /predict request and its response.](../screenshots/10_fastapi_docs.png) |
-| *Figure 24. `make docker-build`, `docker-run` and `smoke` passing.* | *Figure 25. Swagger UI: a `/predict` request and response.* |
-| ![Figure 26. Prometheus targets: the cardiorisk-api pods are UP.](../screenshots/13_prometheus_targets.png) | ![Figure 27. kubectl logs with JSON request and prediction lines.](../screenshots/15_api_json_logs.png) |
-| *Figure 26. Prometheus: `cardiorisk-api` pod targets UP.* | *Figure 27. `kubectl logs`: JSON request and prediction lines.* |
+| ![Figure 18. MLflow experiment view: the four family runs of a session with their key metrics.](../screenshots/01_mlflow_experiment_runs.png) | ![Figure 19. The champion run's overview: description, metrics and parameters.](../screenshots/02_mlflow_champion_run-main-page.png) |
+| *Figure 18. MLflow experiment: the four family runs of a session.* | *Figure 19. MLflow champion run: metrics and parameters.* |
+| ![Figure 20. The champion run's artifacts: plots/ with the leave-one-site-out chart, cv_results.csv and the classification report.](../screenshots/02_mlflow_champion_run-artifact-plots.png) | ![Figure 21. Parallel-coordinates comparison of the 36 nested logistic-regression runs.](../screenshots/03_mlflow_compare_runs.png) |
+| *Figure 20. Champion run artifacts: `plots/`, `cv_results.csv`, report.* | *Figure 21. Compare view of the 36 nested logistic-regression runs.* |
+| ![Figure 22. Model registry: cardiorisk-classifier with the @champion alias.](../screenshots/04_mlflow_model_registry.png) | ![Figure 23. Artifacts attached to the workflow run.](../screenshots/07_github_actions_artifacts.png) |
+| *Figure 22. Registry: `cardiorisk-classifier@champion`.* | *Figure 23. Artifacts of the workflow run.* |
+| ![Figure 24. The GHCR package with the sha-7 and latest tags.](../screenshots/08_ghcr_package.png) | ![Figure 25. Terminal: make docker-build and make smoke passing against the container.](../screenshots/09_docker_build.png) |
+| *Figure 24. GHCR package, tags `sha-<7>` and `latest`.* | *Figure 25. `make docker-build` and `make smoke` passing.* |
+| ![Figure 26. Terminal: make docker-run with the container's JSON startup, request and prediction logs.](../screenshots/09_docker_build_run.png) | ![Figure 27. Swagger UI with a /predict request and its response.](../screenshots/10_fastapi_docs.png) |
+| *Figure 26. `make docker-run`: the container's JSON logs.* | *Figure 27. Swagger UI: a `/predict` request and response.* |
+| ![Figure 28. Prometheus targets: the cardiorisk-api pods are UP.](../screenshots/13_prometheus_targets.png) | ![Figure 29. kubectl logs with JSON request and prediction lines.](../screenshots/15_api_json_logs.png) |
+| *Figure 28. Prometheus: `cardiorisk-api` pod targets UP.* | *Figure 29. `kubectl logs`: JSON request and prediction lines.* |

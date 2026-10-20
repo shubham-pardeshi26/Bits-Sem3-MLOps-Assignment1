@@ -501,14 +501,16 @@ container listens on 8000), `URL` (`http://127.0.0.1:$(PORT)`), `MLFLOW_PORT` (5
 | File | Shows |
 | --- | --- |
 | `01_mlflow_experiment_runs.png` | MLflow experiment `cardiorisk-heart-disease`: the four family runs with key metric columns |
-| `02_mlflow_champion_run.png` | the champion run: parameters, metrics and the `plots/` artifacts |
+| `02_mlflow_champion_run-main-page.png` | the champion run: metrics and parameters |
+| `02_mlflow_champion_run-artifact-plots.png` | the champion run: `plots/` artifacts (leave-one-site-out chart), `cv_results.csv` |
 | `03_mlflow_compare_runs.png` | parallel-coordinates compare view of the nested grid runs of one family |
 | `04_mlflow_model_registry.png` | registered model `cardiorisk-classifier` with the `@champion` alias |
 | `05_github_actions_pipeline.png` | a workflow run graph with all six jobs green |
 | `06_github_actions_summary.png` | the run summary: test summary and model comparison table |
 | `07_github_actions_artifacts.png` | the run's artifacts list |
 | `08_ghcr_package.png` | the GHCR package with the `sha-<7>` and `latest` tags |
-| `09_docker_build_run.png` | `make docker-build`, `make docker-run` and `make smoke` passing |
+| `09_docker_build.png` | `make docker-build` and `make smoke` passing |
+| `09_docker_build_run.png` | `make docker-run`: the container's JSON logs |
 | `10_fastapi_docs.png` | Swagger UI `/docs` with a `/predict` request and response |
 | `11_k8s_resources.png` | `kubectl --context minikube -n cardiorisk get pods,svc,ingress,hpa` |
 | `12_k8s_smoke_test.png` | `minikube tunnel` running and `make smoke` passing via the LoadBalancer and the Ingress |

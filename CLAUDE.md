@@ -110,7 +110,7 @@ offline with `kubectl kustomize deploy/k8s/overlays/<minikube|kind|cloud>`.
   pins `skops==0.16.0` for the MLflow-logged copy.
 - The screenshot file names (`screenshots/NN_*.png`) are shared by `reports/REPORT.md`, README and
   `screenshots/README.md` (the checklist, which also says which 5 sit in the report body and which
-  10 in its Appendix C); rename in all of them or none. Image widths come from
+  12 in its Appendix C); rename in all of them or none. Image widths come from
   `reports/pandoc-figures.lua` by file name, so REPORT.md stays plain Markdown. The report body
   (Sections 1-12) is kept to about 10 A4 pages; rebuild `make report` and `make report-pdf` after
   the screenshots are added or REPORT.md changes.
